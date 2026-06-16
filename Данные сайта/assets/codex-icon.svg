@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Codex">
+  <defs>
+    <linearGradient id="codex-bg" x1="28" y1="6" x2="70" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b391ff"/>
+      <stop offset="0.5" stop-color="#638dff"/>
+      <stop offset="1" stop-color="#2f3fff"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#4653ff" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <path filter="url(#soft-shadow)" fill="url(#codex-bg)" d="M39.7 9.4c8.8-5 21.2-2.6 26.5 5.5 8.3-1 17.2 4.2 19.2 12.5 7.3 2.6 11.1 11.6 7.3 18.8 4.2 7.7.3 18-8.2 20.6-2.6 8-11.6 12.6-19.7 10.8-5 7.6-17.1 10-25.2 5.3-7 4-17.9 2.2-22.2-5.5-8.8-.2-16.2-7.6-15.8-16.2-6.3-4.9-6.2-15.4.1-20.4-1.3-8.6 5.1-16.9 13.6-17.8 2.8-8 15.2-12.2 24.4-14.1Z"/>
+  <path fill="#fff" opacity="0.92" d="M32.9 29.8a5.6 5.6 0 0 1 7.9.2l14.8 15.6a5.6 5.6 0 0 1 0 7.7L40.8 68.8a5.6 5.6 0 1 1-8.1-7.7l11.2-11.6-11.2-11.8a5.6 5.6 0 0 1 .2-7.9Zm27.5 31.7a5.6 5.6 0 0 1 5.6-5.6h16.1a5.6 5.6 0 0 1 0 11.2H66a5.6 5.6 0 0 1-5.6-5.6Z"/>
+</svg>

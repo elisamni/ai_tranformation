@@ -21,12 +21,60 @@ const caseTabs = Array.from(document.querySelectorAll(".case-tab, .proof-card"))
 const casePanels = Array.from(document.querySelectorAll("[data-case-panel]"));
 
 caseTabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
+  tab.addEventListener("click", (event) => {
+    event.preventDefault();
+    const scrollPosition = { x: window.scrollX, y: window.scrollY };
     const target = tab.dataset.case;
 
-    caseTabs.forEach((item) => item.classList.toggle("is-active", item.dataset.case === target));
+    caseTabs.forEach((item) => {
+      const isActive = item.dataset.case === target;
+      item.classList.toggle("is-active", isActive);
+      if (item.classList.contains("proof-card")) {
+        item.setAttribute("aria-selected", String(isActive));
+      }
+    });
     casePanels.forEach((panel) => {
       panel.classList.toggle("is-active", panel.dataset.casePanel === target);
+    });
+
+    requestAnimationFrame(() => {
+      window.scrollTo(scrollPosition.x, scrollPosition.y);
+    });
+  });
+});
+
+const navLinks = Array.from(document.querySelectorAll(".site-nav a"));
+const navSections = navLinks
+  .map((link) => document.querySelector(link.getAttribute("href")))
+  .filter(Boolean);
+
+if (navLinks.length && navSections.length) {
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+
+      const id = `#${entry.target.id}`;
+      navLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.getAttribute("href") === id);
+      });
+    });
+  }, { rootMargin: "-30% 0px -55% 0px", threshold: 0.01 });
+
+  navSections.forEach((section) => navObserver.observe(section));
+}
+
+const platformRows = Array.from(document.querySelectorAll("[data-platform-row]"));
+
+platformRows.forEach((row) => {
+  row.addEventListener("click", () => {
+    const item = row.closest(".platform-item");
+    if (!item) return;
+
+    platformRows.forEach((otherRow) => {
+      const otherItem = otherRow.closest(".platform-item");
+      const isOpen = otherItem === item;
+      otherItem?.classList.toggle("is-open", isOpen);
+      otherRow.setAttribute("aria-expanded", String(isOpen));
     });
   });
 });
