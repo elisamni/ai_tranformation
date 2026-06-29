@@ -63,6 +63,61 @@ if (navLinks.length && navSections.length) {
   navSections.forEach((section) => navObserver.observe(section));
 }
 
+const diagnosticModal = document.querySelector("[data-diagnostic-modal]");
+const diagnosticDialog = document.querySelector(".diagnostic-dialog");
+const diagnosticTriggers = Array.from(document.querySelectorAll("[data-diagnostic-trigger]"));
+const diagnosticCloseButtons = Array.from(document.querySelectorAll("[data-diagnostic-close]"));
+const diagnosticStart = document.querySelector("[data-diagnostic-start]");
+let diagnosticReturnTarget = null;
+
+function openDiagnosticModal(event) {
+  event.preventDefault();
+
+  if (!diagnosticModal) return;
+  diagnosticReturnTarget = event.currentTarget;
+  diagnosticModal.hidden = false;
+  document.body.classList.add("is-modal-open");
+
+  requestAnimationFrame(() => {
+    diagnosticModal.classList.add("is-open");
+    diagnosticDialog?.focus();
+  });
+}
+
+function closeDiagnosticModal({ moveFocus = true, scrollToNext = false } = {}) {
+  if (!diagnosticModal) return;
+
+  diagnosticModal.classList.remove("is-open");
+  document.body.classList.remove("is-modal-open");
+
+  window.setTimeout(() => {
+    diagnosticModal.hidden = true;
+    if (moveFocus) diagnosticReturnTarget?.focus();
+    if (scrollToNext) {
+      const quizTarget = document.querySelector("#aiQuiz") || document.querySelector("#diagnostic");
+      quizTarget?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, 220);
+}
+
+diagnosticTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", openDiagnosticModal);
+});
+
+diagnosticCloseButtons.forEach((button) => {
+  button.addEventListener("click", () => closeDiagnosticModal());
+});
+
+diagnosticStart?.addEventListener("click", () => {
+  closeDiagnosticModal({ moveFocus: false, scrollToNext: true });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && diagnosticModal?.classList.contains("is-open")) {
+    closeDiagnosticModal();
+  }
+});
+
 const platformRows = Array.from(document.querySelectorAll("[data-platform-row]"));
 
 platformRows.forEach((row) => {

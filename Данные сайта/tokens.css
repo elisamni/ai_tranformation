@@ -30,6 +30,15 @@
   --color-on-panel-soft: oklch(68% 0.01 248);
   --color-platform-glass: oklch(100% 0 0 / 0.08);
   --color-platform-glass-strong: oklch(100% 0 0 / 0.14);
+  --gradient-hero-border: linear-gradient(
+    135deg,
+    oklch(61% 0.16 153) 0%,
+    oklch(79% 0.17 116) 28%,
+    oklch(88% 0.19 89) 52%,
+    oklch(84% 0.12 318) 78%,
+    oklch(82% 0.11 38) 100%
+  );
+  --hero-border-size: 6px;
 
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
