@@ -17,6 +17,69 @@ document.querySelectorAll("[data-reveal]").forEach((element) => {
   revealObserver.observe(element);
 });
 
+function initOwnerLiveBubbles() {
+  const section = document.querySelector(".owner-bubbles");
+  const bubbles = Array.from(document.querySelectorAll(".owner-bubbles .phrase-bubble"));
+  if (!section || bubbles.length < 2) return;
+
+  const liveQuery = window.matchMedia("(min-width: 981px)");
+  const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const activeCount = Math.min(4, bubbles.length);
+  let intervalId = null;
+  let activeQueue = [];
+  let nextIndex = 0;
+
+  function stopLiveMode({ showAll = false } = {}) {
+    if (intervalId) window.clearInterval(intervalId);
+    intervalId = null;
+    section.classList.remove("live-bubbles");
+    activeQueue = [];
+    bubbles.forEach((bubble) => {
+      bubble.classList.toggle("is-live-visible", showAll);
+    });
+  }
+
+  function startLiveMode() {
+    stopLiveMode();
+
+    if (!liveQuery.matches || reduceMotionQuery.matches) {
+      stopLiveMode({ showAll: true });
+      return;
+    }
+
+    section.classList.add("live-bubbles");
+    nextIndex = activeCount;
+    activeQueue = bubbles.slice(0, activeCount).map((_, index) => index);
+
+    activeQueue.forEach((index, order) => {
+      window.setTimeout(() => {
+        bubbles[index]?.classList.add("is-live-visible");
+      }, order * 180);
+    });
+
+    intervalId = window.setInterval(() => {
+      const outgoingIndex = activeQueue.shift();
+      if (typeof outgoingIndex === "number") {
+        bubbles[outgoingIndex]?.classList.remove("is-live-visible");
+      }
+
+      const incomingIndex = nextIndex;
+      activeQueue.push(incomingIndex);
+      window.setTimeout(() => {
+        bubbles[incomingIndex]?.classList.add("is-live-visible");
+      }, 260);
+
+      nextIndex = (nextIndex + 1) % bubbles.length;
+    }, 1900);
+  }
+
+  startLiveMode();
+  liveQuery.addEventListener?.("change", startLiveMode);
+  reduceMotionQuery.addEventListener?.("change", startLiveMode);
+}
+
+initOwnerLiveBubbles();
+
 const caseTabs = Array.from(document.querySelectorAll(".case-tab, .proof-card"));
 const casePanels = Array.from(document.querySelectorAll("[data-case-panel]"));
 
@@ -62,6 +125,47 @@ if (navLinks.length && navSections.length) {
 
   navSections.forEach((section) => navObserver.observe(section));
 }
+
+navLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const href = link.getAttribute("href");
+    if (!href?.startsWith("#")) return;
+
+    const target = document.querySelector(href);
+    const header = document.querySelector(".site-header");
+    if (!target) return;
+
+    event.preventDefault();
+    const headerBottom = header?.getBoundingClientRect().bottom || 0;
+    const scrollTarget = href === "#results"
+      ? target.querySelector(".section-intro h2") || target
+      : target;
+    const desiredTop = href === "#results"
+      ? headerBottom + 46
+      : href === "#employee-cases"
+        ? headerBottom + 22
+        : headerBottom;
+    const top = scrollTarget.getBoundingClientRect().top + window.scrollY - desiredTop;
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    window.history.pushState(null, "", href);
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, top);
+    requestAnimationFrame(() => {
+      const currentHeaderBottom = header?.getBoundingClientRect().bottom || 0;
+      const currentDesiredTop = href === "#results"
+        ? currentHeaderBottom + 46
+        : href === "#employee-cases"
+          ? currentHeaderBottom + 22
+          : currentHeaderBottom;
+      const delta = scrollTarget.getBoundingClientRect().top - currentDesiredTop;
+      if (Math.abs(delta) > 1) {
+        window.scrollBy(0, delta);
+      }
+      root.style.scrollBehavior = previousScrollBehavior;
+    });
+  });
+});
 
 const diagnosticModal = document.querySelector("[data-diagnostic-modal]");
 const diagnosticDialog = document.querySelector(".diagnostic-dialog");
@@ -133,6 +237,32 @@ platformRows.forEach((row) => {
     });
   });
 });
+
+const employeeSlider = document.querySelector("[data-employee-slider]");
+const employeePrev = document.querySelector("[data-slider-prev]");
+const employeeNext = document.querySelector("[data-slider-next]");
+const employeeSlides = Array.from(document.querySelectorAll(".employee-slide"));
+
+function getCurrentEmployeeSlideIndex() {
+  if (!employeeSlider || !employeeSlides.length) return 0;
+  const sliderCenter = employeeSlider.scrollLeft + employeeSlider.clientWidth / 2;
+  return employeeSlides.reduce((closestIndex, slide, index) => {
+    const closestSlide = employeeSlides[closestIndex];
+    const currentDistance = Math.abs(slide.offsetLeft + slide.offsetWidth / 2 - sliderCenter);
+    const closestDistance = Math.abs(closestSlide.offsetLeft + closestSlide.offsetWidth / 2 - sliderCenter);
+    return currentDistance < closestDistance ? index : closestIndex;
+  }, 0);
+}
+
+function scrollEmployeeCases(direction) {
+  if (!employeeSlider || !employeeSlides.length) return;
+  const currentIndex = getCurrentEmployeeSlideIndex();
+  const targetIndex = (currentIndex + direction + employeeSlides.length) % employeeSlides.length;
+  employeeSlider.scrollTo({ left: employeeSlides[targetIndex].offsetLeft, behavior: "smooth" });
+}
+
+employeePrev?.addEventListener("click", () => scrollEmployeeCases(-1));
+employeeNext?.addEventListener("click", () => scrollEmployeeCases(1));
 
 const opsTabs = Array.from(document.querySelectorAll(".ops-tab"));
 const opsPanels = Array.from(document.querySelectorAll("[data-ops-panel]"));
